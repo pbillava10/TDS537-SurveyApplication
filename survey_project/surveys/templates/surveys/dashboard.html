@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Dashboard</h1>
+
+        <!-- Conditional content based on user role -->
+        {% if role == 'Creator' %}
+            <h2>Welcome, Survey Creator!</h2>
+            <a href="{% url 'create_survey' %}" class="btn btn-primary mb-3">Create New Survey</a>
+
+            <h3>Your Surveys</h3>
+            {% if surveys %}
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Survey Name</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for survey in surveys %}
+                            <tr>
+                                <td>{{ survey.name }}</td>
+                                <td>{{ survey.description }}</td>
+                                <td>{{ survey.state }}</td>
+                                <td>
+                                    <a href="{% url 'edit_survey' survey.id %}" class="btn btn-secondary btn-sm">Edit</a>
+                                    <a href="{% url 'view_results' survey.id %}" class="btn btn-info btn-sm">View Results</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>You have not created any surveys yet.</p>
+            {% endif %}
+
+        {% elif role == 'Taker' %}
+            <h2>Welcome, Survey Taker!</h2>
+            <h3>Available Surveys</h3>
+            {% if surveys %}
+                <div class="list-group">
+                    {% for survey in surveys %}
+                        <a href="{% url 'take_survey' survey.id %}" class="list-group-item list-group-item-action">
+                            <h5 class="mb-1">{{ survey.name }}</h5>
+                            <p class="mb-1">{{ survey.description }}</p>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No surveys available at the moment. Check back later!</p>
+            {% endif %}
+        {% endif %}
+    </div>
+</body>
+</html>
