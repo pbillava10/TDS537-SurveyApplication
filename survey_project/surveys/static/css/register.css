@@ -1,0 +1,113 @@
+/* Resetting some default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body setup */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #d9f7e3; /* Light Green Background */
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+}
+
+/* Main container for full-screen height */
+.main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    background-color: #d9f7e3; /* Light Green Background */
+}
+
+/* Content Block */
+.content {
+    text-align: left; /* Align text to the left */
+    background-color: #ffffff; /* White background for the content block */
+    padding: 40px 50px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    width: 90%;
+    max-width: 900px; /* Wider width for landscape format */
+}
+
+/* Header (H1) Style */
+h1 {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 3em;
+    color: #78866B; /* Camouflage color for the header */
+    margin-bottom: 20px;
+}
+
+/* Form Label */
+.form-label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+/* Button Styling */
+.btn {
+    font-size: 1.1rem;
+    padding: 12px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Soft shadow */
+}
+
+/* Green Register Button */
+.btn-success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #45a049;
+    cursor: pointer;
+}
+
+/* Grey Go to Main Page Button */
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    cursor: pointer;
+}
+
+/* Form Element Styling */
+.form-control {
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    padding: 10px;
+    font-size: 1rem;
+}
+
+/* Form Error Styling */
+.alert-danger {
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    background-color: #ffcccc; /* Light red background for errors */
+    color: #cc0000;
+    border-radius: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .content {
+        padding: 20px;
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 2.5em;
+    }
+}

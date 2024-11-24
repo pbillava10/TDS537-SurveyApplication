@@ -14,9 +14,10 @@ class UserRegistrationForm(UserCreationForm):
 class SurveyForm(forms.ModelForm):
     class Meta:
         model = Survey
-        fields = ['name', 'description']
+        fields = ['name', 'description', 'state']
 
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
         fields = ['text', 'question_type']
+

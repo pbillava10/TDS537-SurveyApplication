@@ -10,15 +10,27 @@
     <div class="container mt-5">
         <h1 class="text-center">Dashboard</h1>
 
-        <!-- Conditional content based on user role -->
+        <!-- Display Django messages -->
+        {% if messages %}
+            <div>
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         {% if role == 'Creator' %}
-            <h2>Welcome, Survey Creator!</h2>
-            <a href="{% url 'create_survey' %}" class="btn btn-primary mb-3">Create New Survey</a>
+            <div class="text-center mb-4">
+                <h2>Welcome, Survey Creator!</h2>
+                <a href="{% url 'create_survey' %}" class="btn btn-primary">Create New Survey</a>
+            </div>
 
             <h3>Your Surveys</h3>
             {% if surveys %}
-                <table class="table table-bordered">
-                    <thead>
+                <table class="table table-bordered table-hover">
+                    <thead class="table-dark">
                         <tr>
                             <th>Survey Name</th>
                             <th>Description</th>
@@ -29,37 +41,93 @@
                     <tbody>
                         {% for survey in surveys %}
                             <tr>
-                                <td>{{ survey.name }}</td>
+                                <td>
+                                    <a href="{% url 'survey_detail' survey.id %}" class="text-decoration-none">
+                                        {{ survey.name }}
+                                    </a>
+                                </td>
                                 <td>{{ survey.description }}</td>
                                 <td>{{ survey.state }}</td>
                                 <td>
-                                    <a href="{% url 'edit_survey' survey.id %}" class="btn btn-secondary btn-sm">Edit</a>
-                                    <a href="{% url 'view_results' survey.id %}" class="btn btn-info btn-sm">View Results</a>
+                                    <div class="d-flex gap-2">
+                                        {% if survey.state == 'Draft' %}
+                                            <a href="{% url 'edit_survey' survey.id %}" class="btn btn-secondary btn-sm">Edit</a>
+                                        {% elif survey.state == 'Published' or survey.state == 'Closed' or survey.state == 'Republished' %}
+                                            <a href="{% url 'view_results' survey.id %}" class="btn btn-info btn-sm">View Results</a>
+                                        {% endif %}
+                                        <form method="POST" action="{% url 'update_survey_status' survey.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <select name="new_status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                                <option disabled selected>Change Status</option>
+                                                {% if survey.state == 'Draft' %}
+                                                    <option value="Published">Publish</option>
+                                                {% elif survey.state == 'Published' %}
+                                                    <option value="Closed">Close</option>
+                                                    <option value="Republished">Republish</option>
+                                                {% elif survey.state == 'Closed' %}
+                                                    <option value="Republished">Republish</option>
+                                                {% endif %}
+                                            </select>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             {% else %}
-                <p>You have not created any surveys yet.</p>
+                <p>No surveys created yet. Click "Create New Survey" to get started!</p>
             {% endif %}
 
         {% elif role == 'Taker' %}
-            <h2>Welcome, Survey Taker!</h2>
+            <div class="text-center mb-4">
+                <h2>Welcome, Survey Taker!</h2>
+            </div>
+
             <h3>Available Surveys</h3>
             {% if surveys %}
-                <div class="list-group">
-                    {% for survey in surveys %}
-                        <a href="{% url 'take_survey' survey.id %}" class="list-group-item list-group-item-action">
-                            <h5 class="mb-1">{{ survey.name }}</h5>
-                            <p class="mb-1">{{ survey.description }}</p>
-                        </a>
-                    {% endfor %}
-                </div>
+                <table class="table table-bordered table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Survey Name</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for survey in surveys %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'survey_detail' survey.id %}" class="text-decoration-none">
+                                        {{ survey.name }}
+                                    </a>
+                                </td>
+                                <td>{{ survey.description }}</td>
+                                <td>{{ survey.user_status }}</td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        {% if survey.user_status == 'Pending' %}
+                                            <a href="{% url 'take_survey' survey.id %}" class="btn btn-primary btn-sm">Take Survey</a>
+                                        {% elif survey.user_status == 'In Progress' %}
+                                            <a href="{% url 'take_survey' survey.id %}" class="btn btn-warning btn-sm">Resume Survey</a>
+                                        {% elif survey.user_status == 'Results Available' %}
+                                            <a href="{% url 'view_results' survey.id %}" class="btn btn-info btn-sm">View Results</a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             {% else %}
                 <p>No surveys available at the moment. Check back later!</p>
             {% endif %}
         {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{% url 'logout' %}" class="btn btn-danger btn-lg">Logout</a>
+        </div>
     </div>
 </body>
 </html>
