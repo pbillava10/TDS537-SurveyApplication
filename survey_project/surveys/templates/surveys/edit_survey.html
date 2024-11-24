@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Survey</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Edit Survey: {{ survey.name }}</h2>
+        <form method="post" action="{% url 'edit_survey' survey.id %}">
+            {% csrf_token %}
+
+            <!-- Survey Name and Description -->
+            <div class="mb-4">
+                <label for="survey_name">Survey Name:</label>
+                <input type="text" name="survey_name" id="survey_name" class="form-control" value="{{ survey.name }}" required>
+            </div>
+            <div class="mb-4">
+                <label for="survey_description">Survey Description:</label>
+                <textarea name="survey_description" id="survey_description" class="form-control" rows="3" required>{{ survey.description }}</textarea>
+            </div>
+
+            <!-- Existing Questions -->
+            <div id="questions">
+                {% for question in questions %}
+                    <div class="question mt-4 border p-3" id="question_{{ question.id }}">
+                        <label for="question_text_{{ question.id }}">Question Text:</label>
+                        <input type="text" name="question_text_{{ question.id }}" id="question_text_{{ question.id }}" value="{{ question.text }}" class="form-control" required>
+
+                        <label for="question_type_{{ question.id }}" class="mt-2">Question Type:</label>
+                        <select name="question_type_{{ question.id }}" id="question_type_{{ question.id }}" class="form-select" onchange="toggleOptions('{{ question.id }}', this.value)" required>
+                            <option value="text" {% if question.question_type == "text" %}selected{% endif %}>Text Input</option>
+                            <option value="radio" {% if question.question_type == "radio" %}selected{% endif %}>Single Choice</option>
+                            <option value="checkbox" {% if question.question_type == "checkbox" %}selected{% endif %}>Multiple Choice</option>
+                        </select>
+
+                        <!-- Option Inputs -->
+                        <div class="options mt-3" id="options_{{ question.id }}" style="display: {% if question.question_type == 'radio' or question.question_type == 'checkbox' %}block{% else %}none{% endif %}">
+                            <label>Options:</label>
+                            <div class="option-group" id="option-group_{{ question.id }}">
+                                {% for option in question.options.all %}
+                                    <div class="option-item d-flex align-items-center mt-2" id="option_{{ question.id }}_{{ forloop.counter }}">
+                                        <input type="hidden" name="option_id_{{ question.id }}" value="{{ option.id }}">
+                                        <input type="text" name="option_text_{{ question.id }}" value="{{ option.text }}" class="form-control me-2" required>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeOption('{{ question.id }}', {{ forloop.counter }})">Remove</button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="addOption('{{ question.id }}')">Add Option</button>
+                        </div>
+
+                        <!-- Hidden field for new option count -->
+                        <input type="hidden" name="new_option_count_{{ question.id }}" id="new_option_count_{{ question.id }}" value="0">
+
+                        <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeQuestion('{{ question.id }}')">Remove Question</button>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- New Question Inputs -->
+            <input type="hidden" name="new_question_counter" id="new_question_counter" value="{{ new_question_counter }}">
+            <button type="button" class="btn btn-primary mt-3" onclick="addQuestion()">Add New Question</button>
+
+            <!-- Submit Button -->
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">Save Changes</button>
+            </div>
+        </form>
+
+        <!-- Back to Dashboard Button -->
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-4">Back to Dashboard</a>
+    </div>
+
+    <script>
+        let newQuestionCounter = {{ new_question_counter }};
+
+        function addQuestion() {
+            newQuestionCounter++;
+            document.getElementById('new_question_counter').value = newQuestionCounter;
+            const questionsDiv = document.getElementById('questions');
+
+            const newQuestionHtml = `
+                <div class="question mt-4 border p-3" id="question_${newQuestionCounter}">
+                    <label for="new_question_text_${newQuestionCounter}">Question Text:</label>
+                    <input type="text" name="new_question_text_${newQuestionCounter}" id="new_question_text_${newQuestionCounter}" class="form-control" required>
+
+                    <label for="new_question_type_${newQuestionCounter}" class="mt-2">Question Type:</label>
+                    <select name="new_question_type_${newQuestionCounter}" id="new_question_type_${newQuestionCounter}" class="form-select" onchange="toggleOptions(${newQuestionCounter}, this.value)" required>
+                        <option value="text">Text Input</option>
+                        <option value="radio">Single Choice</option>
+                        <option value="checkbox">Multiple Choice</option>
+                    </select>
+
+                    <div class="options mt-3" id="options_${newQuestionCounter}" style="display:none;">
+                        <label>Options:</label>
+                        <div class="option-group" id="option-group_${newQuestionCounter}">
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="addOption(${newQuestionCounter})">Add Option</button>
+                    </div>
+                    <input type="hidden" name="new_option_count_${newQuestionCounter}" id="new_option_count_${newQuestionCounter}" value="0">
+
+                    <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeQuestion(${newQuestionCounter})">Remove Question</button>
+                </div>
+            `;
+
+            questionsDiv.insertAdjacentHTML('beforeend', newQuestionHtml);
+        }
+
+        function addOption(questionId) {
+            const optionGroup = document.getElementById(`option-group_${questionId}`);
+            const optionCount = optionGroup.children.length + 1;
+            document.getElementById(`new_option_count_${questionId}`).value = optionCount;
+
+            const newOptionHtml = `
+                <div class="option-item d-flex align-items-center mt-2" id="option_${questionId}_${optionCount}">
+                    <input type="text" name="new_option_text_${questionId}_${optionCount}" class="form-control me-2" required>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeOption('${questionId}', ${optionCount})">Remove</button>
+                </div>
+            `;
+            optionGroup.insertAdjacentHTML('beforeend', newOptionHtml);
+        }
+
+        function removeOption(questionId, optionCount) {
+            document.getElementById(`option_${questionId}_${optionCount}`).remove();
+        }
+
+        function removeQuestion(questionId) {
+            document.getElementById(`question_${questionId}`).remove();
+        }
+
+        function toggleOptions(questionId, questionType) {
+            const optionsDiv = document.getElementById(`options_${questionId}`);
+            if (questionType === 'radio' || questionType === 'checkbox') {
+                optionsDiv.style.display = 'block';
+            } else {
+                optionsDiv.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
