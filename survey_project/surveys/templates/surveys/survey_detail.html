@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Details</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">{{ survey.name }}</h2>
+        <p>{{ survey.description }}</p>
+        <p><strong>Status:</strong> {{ survey.get_state_display }}</p>
+
+        <h4>Questions</h4>
+        <ul class="list-group">
+            {% for question in survey.questions.all %}
+                <li class="list-group-item">
+                    <strong>{{ question.text }}</strong>
+                    ({{ question.get_question_type_display }})
+                    <ul class="list-group mt-2">
+                        {% for option in question.options.all %}
+                            <li class="list-group-item">{{ option.text }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Back to Dashboard Button -->
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-4">Back to Dashboard</a>
+    </div>
+</body>
+</html>

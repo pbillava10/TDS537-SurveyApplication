@@ -1,0 +1,115 @@
+/* Resetting some default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body setup */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #d9f7e3; /* Light Green Background */
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+}
+
+/* Main container for full-screen height */
+.main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    background-color: #d9f7e3; /* Light Green Background */
+}
+
+/* Content Block */
+.content {
+    text-align: center;
+    background-color: #ffffff; /* White background for the content block */
+    padding: 60px 70px; /* Increased padding for more space */
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    width: 90%;
+    max-width: 600px; /* Increased max-width for a bigger content block */
+}
+
+/* Header (H1) Style */
+h1 {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 3em;
+    color: #4caf50; /* Green color for the header */
+    margin-bottom: 20px;
+}
+
+/* Lead Text Styling */
+.lead {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+/* Button Group Container */
+.btn-group {
+    display: flex;
+    justify-content: space-around;
+}
+
+/* Button Styling */
+.btn {
+    font-size: 1.1em;
+    padding: 15px 30px;
+    border-radius: 25px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: transform 0.3s ease-in-out, background-color 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow on buttons */
+}
+
+/* Primary Button Styling */
+.btn-primary {
+    background-color: #4caf50; /* Fresh Green Color */
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #45a049; /* Slightly darker green on hover */
+    transform: scale(1.05); /* Slight button hover effect */
+}
+
+/* Secondary Button Styling */
+.btn-secondary {
+    background-color: #ff9800; /* Vibrant Orange */
+    border: none;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #f57c00; /* Darker orange on hover */
+    transform: scale(1.05); /* Slight button hover effect */
+}
+
+/* Button Size and Spacing */
+.btn-lg {
+    width: 45%;
+    margin-top: 10px;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.5em; /* Slightly smaller text for smaller screens */
+    }
+
+    .lead {
+        font-size: 1em; /* Smaller lead text on mobile */
+    }
+
+    .btn-lg {
+        width: 80%; /* Full width buttons on smaller screens */
+    }
+}

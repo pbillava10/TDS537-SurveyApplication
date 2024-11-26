@@ -1,0 +1,166 @@
+/* =======================
+   RESET DEFAULT STYLES
+======================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* =======================
+   BODY SETUP
+======================= */
+body {
+    font-family: 'Roboto', sans-serif; /* Clean font */
+    background-color: #d9f7e3; /* Light green background */
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333; /* Dark text color */
+}
+
+/* =======================
+   MAIN CONTAINER
+======================= */
+.main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Full height */
+    width: 100%;
+    background-color: #d9f7e3; /* Light green */
+}
+
+/* =======================
+   CONTENT BLOCK
+======================= */
+.content {
+    text-align: center;
+    background-color: #ffffff; /* White background for the form block */
+    padding: 40px 50px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    width: 90%;
+    max-width: 500px; /* Maximum width */
+}
+
+/* =======================
+   HEADER STYLING (TITLE)
+======================= */
+h1 {
+    font-family: 'Quicksand', sans-serif; /* Friendly, modern font */
+    font-size: 2.5em;
+    color: #78866B; /* Camouflage color for the header */
+    margin-bottom: 20px;
+}
+
+/* =======================
+   LOGO IMAGE
+======================= */
+.logo {
+    width: 120px;
+    height: auto;
+    margin-bottom: 20px; /* Space below the logo */
+}
+
+/* =======================
+   FORM ELEMENT STYLING
+======================= */
+.form-label {
+    font-size: 1rem;
+    color: #333;
+}
+
+.form-control {
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.form-control:focus {
+    border-color: #4CAF50; /* Green focus border */
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+/* =======================
+   BUTTON STYLING
+======================= */
+.btn {
+    font-size: 1.1em;
+    padding: 15px 30px;
+    border-radius: 25px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: transform 0.3s ease-in-out, background-color 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    width: 100%; /* Full width button */
+}
+
+/* Primary Button Styling */
+.btn-primary {
+    background-color: #4CAF50; /* Fresh Green */
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #45a049; /* Darker green on hover */
+    transform: scale(1.05); /* Button hover effect */
+}
+
+/* Secondary Button Styling */
+.btn-secondary {
+    background-color: #ff9800; /* Vibrant Orange */
+    border: none;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #f57c00; /* Darker orange on hover */
+    transform: scale(1.05); /* Button hover effect */
+}
+
+/* =======================
+   FOOTER LINK STYLING
+======================= */
+p {
+    font-size: 1rem;
+    color: #555;
+}
+
+a {
+    color: #4CAF50; /* Green color for links */
+    text-decoration: none;
+    font-weight: 500;
+}
+
+a:hover {
+    text-decoration: underline; /* Underline on hover */
+    color: #388e3c; /* Darker green on hover */
+}
+
+/* =======================
+   RESPONSIVE DESIGN STYLES
+======================= */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.5em; /* Slightly smaller heading on small screens */
+    }
+
+    .logo {
+        width: 100px; /* Smaller logo on small screens */
+    }
+
+    .content {
+        padding: 30px 40px; /* Reduced padding on small screens */
+    }
+
+    .btn-lg {
+        width: 80%; /* Full-width buttons on smaller screens */
+    }
+}
