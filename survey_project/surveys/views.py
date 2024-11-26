@@ -34,7 +34,7 @@ def register(request):
                     SurveyTakerStatus.objects.get_or_create(
                         survey=survey,
                         user=user,
-                        defaults={'status': 'Pending'}
+                        defaults={'survey_status': 'Pending'}
                     )
 
             return redirect('dashboard')  # Redirect to the dashboard after registration
