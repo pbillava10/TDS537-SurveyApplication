@@ -9,7 +9,6 @@ class Profile(models.Model):
     class Meta:
         db_table = 'profile'
 
-
 class Survey(models.Model):
     STATE_CHOICES = [
         ('Draft', 'Draft'),
@@ -21,7 +20,10 @@ class Survey(models.Model):
     description = models.TextField()
     state = models.CharField(max_length=100, choices=STATE_CHOICES, default='Draft')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    republished_date = models.DateTimeField(null=True, blank=True)  # Track republished date
+    # republished_date = models.DateTimeField(null=True, blank=True)  # Track republished date
+    can_view_results = models.BooleanField(default=False)  # Can participants view the results
+    can_retake = models.BooleanField(default=False)  # Can participants retake the survey
+    invited_users = models.ManyToManyField(User, related_name="invited_surveys", blank=True)
 
     class Meta:
         db_table = 'survey'
@@ -83,6 +85,7 @@ class Response(models.Model):
     text_answer = models.TextField(blank=True, null=True)  # For text-based questions
     date_answer = models.DateField(blank=True, null=True)  # For calendar questions
     status = models.CharField(max_length=15, choices=SURVEY_STATUS_CHOICES, default='Pending')
+    others_input = models.TextField(blank=True, null=True)
 
     class Meta:
         db_table = 'response'

@@ -1,133 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
     <div class="container mt-5">
         <h1 class="text-center">Dashboard</h1>
 
         <!-- Display Django messages -->
         {% if messages %}
-            <div>
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}" role="alert">
-                        {{ message }}
-                    </div>
-                {% endfor %}
+        <div>
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
             </div>
+            {% endfor %}
+        </div>
         {% endif %}
 
         {% if role == 'Creator' %}
-            <div class="text-center mb-4">
-                <h2>Welcome, Survey Creator!</h2>
-                <a href="{% url 'create_survey' %}" class="btn btn-primary">Create New Survey</a>
-            </div>
+        <div class="text-center mb-4">
+            <h2>Welcome, Survey Creator!</h2>
+            <a href="{% url 'create_survey' %}" class="btn btn-primary">Create New Survey</a>
+        </div>
 
-            <h3>Your Surveys</h3>
-            {% if surveys %}
-                <table class="table table-bordered table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Survey Name</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for survey in surveys %}
-                            <tr>
-                                <td>
-                                    <a href="{% url 'survey_detail' survey.id %}" class="text-decoration-none">
-                                        {{ survey.name }}
-                                    </a>
-                                </td>
-                                <td>{{ survey.description }}</td>
-                                <td>{{ survey.state }}</td>
-                                <td>
-                                    <div class="d-flex gap-2">
-                                        {% if survey.state == 'Draft' %}
-                                            <a href="{% url 'edit_survey' survey.id %}" class="btn btn-secondary btn-sm">Edit</a>
-                                        {% elif survey.state == 'Published' or survey.state == 'Closed' or survey.state == 'Republished' %}
-                                            <a href="{% url 'view_results' survey.id %}" class="btn btn-info btn-sm">View Results</a>
-                                        {% endif %}
-                                        <form method="POST" action="{% url 'update_survey_status' survey.id %}" class="d-inline">
-                                            {% csrf_token %}
-                                            <select name="new_status" class="form-select form-select-sm" onchange="this.form.submit()">
-                                                <option disabled selected>Change Status</option>
-                                                {% if survey.state == 'Draft' %}
-                                                    <option value="Published">Publish</option>
-                                                {% elif survey.state == 'Published' %}
-                                                    <option value="Closed">Close</option>
-                                                    <option value="Republished">Republish</option>
-                                                {% elif survey.state == 'Closed' %}
-                                                    <option value="Republished">Republish</option>
-                                                {% endif %}
-                                            </select>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No surveys created yet. Click "Create New Survey" to get started!</p>
-            {% endif %}
+        <h3>Your Surveys</h3>
+        {% if surveys %}
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Survey Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for survey in surveys %}
+                <tr>
+                    <td>
+                        <a href="{% url 'survey_detail' survey.id %}" class="text-decoration-none">
+                            {{ survey.name }}
+                        </a>
+                    </td>
+                    <td>{{ survey.description }}</td>
+                    <td>{{ survey.state }}</td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            {% if survey.state == 'Draft' %}
+                            <a href="{% url 'edit_survey' survey.id %}" class="btn btn-secondary btn-sm">Edit</a>
+                            {% elif survey.state == 'Published' %}
+                            <a href="{% url 'view_results' survey.id %}" class="btn btn-info btn-sm">View Results</a>
+                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#inviteTakersModalSurvey{{ survey.id }}">
+                                Invite New Takers
+                            </button>
+                            {% elif survey.state == 'Republished' or survey.state == 'Closed' %}
+                            <a href="{% url 'view_results' survey.id %}" class="btn btn-info btn-sm">View Results</a>
+                            {% endif %}
+                            <form method="POST" action="{% url 'update_survey_status' survey.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <select name="new_status" class="form-select form-select-sm"
+                                    onchange="handleStatusChange(this, '{{ survey.id }}')">
+                                    <option disabled selected>Change Status</option>
+                                    {% if survey.state == 'Draft' %}
+                                    <option value="Published">Publish</option>
+                                    {% elif survey.state == 'Published' %}
+                                    <option value="Closed">Close</option>
+                                    <option value="Republished">Republish</option>
+                                    {% elif survey.state == 'Closed' %}
+                                    <option value="Republished">Republish</option>
+                                    {% endif %}
+                                </select>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+
+<!-- Invite New Takers Modal -->
+<div class="modal fade" id="inviteTakersModalSurvey{{ survey.id }}" tabindex="-1" aria-labelledby="inviteTakersModalLabel{{ survey.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inviteTakersModalLabel{{ survey.id }}">Invite Takers</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'publish_survey' survey.id %}">
+    {% csrf_token %}
+    <div class="form-group">
+        <input type="checkbox" id="selectAll{{ survey.id }}" name="select_all"
+               onchange="toggleAllCheckboxes('{{ survey.id }}')" class="form-check-input">
+        <label for="selectAll{{ survey.id }}">Select All</label>
+        <div>
+            {% for taker in available_takers %}
+                                <input type="checkbox"
+                                       id="taker{{ taker.user.id }}"
+                                       name="selected_users"
+                                       value="{{ taker.user.id }}"
+                                       {% if taker.user in survey.invited_users.all %} checked disabled {% endif %}>
+                                <label for="taker{{ taker.user.id }}">
+                                    {{ taker.user.username }}
+                                    {% if taker.user in survey.invited_users.all %}(Already Invited){% endif %}
+                                </label><br>
+                            {% endfor %}
+        </div>
+    </div>
+    <div class="text-center mt-4">
+    <button type="button" class="btn btn-primary" onclick="handleInviteSubmission(this.form, '{{ survey.id }}')">Publish Survey</button>
+</div>
+</form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No surveys created yet. Click "Create New Survey" to get started!</p>
+        {% endif %}
 
         {% elif role == 'Taker' %}
-            <div class="text-center mb-4">
-                <h2>Welcome, Survey Taker!</h2>
-            </div>
+        <div class="text-center mb-4">
+            <h2>Welcome, Survey Taker!</h2>
+        </div>
 
-            <h3>Available Surveys</h3>
-            {% if surveys %}
-                <table class="table table-bordered table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Survey Name</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for survey in surveys %}
-                            <tr>
-                                <td>
-                                    <a href="{% url 'survey_detail' survey.id %}" class="text-decoration-none">
-                                        {{ survey.name }}
-                                    </a>
-                                </td>
-                                <td>{{ survey.description }}</td>
-                                <td>{{ survey.user_status }}</td>
-                                <td>
-                                    <div class="d-flex gap-2">
-                                        {% if survey.user_status == 'Pending' %}
-                                            <a href="{% url 'take_survey' survey.id %}" class="btn btn-primary btn-sm">Take Survey</a>
-                                        {% elif survey.user_status == 'In Progress' %}
-                                            <a href="{% url 'take_survey' survey.id %}" class="btn btn-warning btn-sm">Resume Survey</a>
-                                        {% elif survey.user_status == 'Results Available' %}
-                                            <a href="{% url 'view_results' survey.id %}" class="btn btn-info btn-sm">View Results</a>
-                                        {% endif %}
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No surveys available at the moment. Check back later!</p>
-            {% endif %}
+        <h3>Available Surveys</h3>
+        {% if surveys %}
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Survey Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for survey in surveys %}
+                <tr>
+                    <td>
+                        <a href="{% url 'survey_detail' survey.id %}" class="text-decoration-none">
+                            {{ survey.name }}
+                        </a>
+                    </td>
+                    <td>{{ survey.description }}</td>
+                    <td>{{ survey.user_status }}</td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            {% if survey.user_status == 'Pending' %}
+                            <a href="{% url 'take_survey' survey.id %}" class="btn btn-primary btn-sm">Take Survey</a>
+                            {% elif survey.user_status == 'In Progress' %}
+                            <a href="{% url 'take_survey' survey.id %}" class="btn btn-warning btn-sm">Resume Survey</a>
+                            {% elif survey.user_status == 'Results Available' %}
+                            <a href="{% url 'view_results' survey.id %}" class="btn btn-info btn-sm">View Results</a>
+                            {% if survey.can_retake %}
+                            <a href="{% url 'retake_survey' survey.id %}" class="btn btn-success btn-sm">
+                    Retake Survey (with Results)
+                </a>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No surveys available at the moment. Check back later!</p>
+        {% endif %}
         {% endif %}
 
         <div class="text-center mt-4">
             <a href="{% url 'logout' %}" class="btn btn-danger btn-lg">Logout</a>
         </div>
     </div>
+
+    <script>
+        function toggleAllCheckboxes(surveyId) {
+    const checkboxes = document.querySelectorAll(`#inviteTakersModalSurvey${surveyId} input[name="selected_users"]`);
+    const selectAll = document.getElementById(`selectAll${surveyId}`);
+    checkboxes.forEach(checkbox => checkbox.checked = selectAll.checked);
+}
+
+        function handleStatusChange(selectElement, surveyId) {
+            if (selectElement.value === "Published") {
+                const modal = new bootstrap.Modal(document.getElementById(`inviteTakersModalSurvey${surveyId}`));
+                modal.show();
+                selectElement.value = "";
+            } else {
+                selectElement.closest('form').submit();
+            }
+        }
+
+        function handleInviteSubmission(form, surveyId) {
+    const existingStatusInput = form.querySelector('input[name="new_status"]');
+    if (!existingStatusInput) {
+        const statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'new_status';
+        statusInput.value = 'Published';
+        form.appendChild(statusInput);
+    }
+    form.submit();
+}
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

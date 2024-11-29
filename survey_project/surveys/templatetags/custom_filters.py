@@ -11,3 +11,4 @@ def dict_get(dictionary, key):
     if isinstance(dictionary, dict):
         return dictionary.get(key, "")
     return ""
+
