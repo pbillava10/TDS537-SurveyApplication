@@ -5,6 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Survey</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> <!-- Font Awesome -->
+    <style>
+        body {
+            background-color: #d9f7e3; /* Light pastel green */
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            margin-top: 50px;
+        }
+
+        h2 {
+            color: #0056b3;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section {
+            background-color: #f1fcf5;
+            border-left: 4px solid #28a745;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-control, .form-select {
+            font-size: 14px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 8px 12px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            box-shadow: 0 0 5px #28a745;
+            border-color: #28a745;
+        }
+
+        .btn {
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #555;
+            font-size: 12px;
+        }
+
+        .option-delete-btn {
+            font-size: 18px;
+            color: #ff4d4d; /* Red color */
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            margin-left: 10px;
+        }
+
+        .option-delete-btn:hover {
+            color: #ff0000; /* Darker red on hover */
+        }
+
+        /* Flex styling for buttons */
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .button-group .btn {
+            width: 32%; /* Adjust width of each button */
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -13,11 +94,12 @@
             {% csrf_token %}
 
             <!-- Survey Name and Description -->
-            <div class="mb-4">
+            <div class="form-section mb-4">
                 <label for="survey_name">Survey Name:</label>
                 <input type="text" name="survey_name" id="survey_name" class="form-control" value="{{ survey.name }}" required>
             </div>
-            <div class="mb-4">
+
+            <div class="form-section mb-4">
                 <label for="survey_description">Survey Description:</label>
                 <textarea name="survey_description" id="survey_description" class="form-control" rows="3" required>{{ survey.description }}</textarea>
             </div>
@@ -25,7 +107,7 @@
             <!-- Existing Questions -->
             <div id="questions">
                 {% for question in questions %}
-                    <div class="question mt-4 border p-3" id="question_{{ question.id }}">
+                    <div class="form-section mb-4" id="question_{{ question.id }}">
                         <label for="question_text_{{ question.id }}">Question Text:</label>
                         <input type="text" name="question_text_{{ question.id }}" id="question_text_{{ question.id }}" value="{{ question.text }}" class="form-control" required>
 
@@ -44,12 +126,15 @@
                                     <div class="option-item d-flex align-items-center mt-2" id="option_{{ question.id }}_{{ forloop.counter }}">
                                         <input type="hidden" name="option_id_{{ question.id }}" value="{{ option.id }}">
                                         <input type="text" name="option_text_{{ question.id }}" value="{{ option.text }}" class="form-control me-2" required>
-                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeOption('{{ question.id }}', {{ forloop.counter }})">Remove</button>
+                                        <button type="button" class="option-delete-btn" onclick="removeOption('{{ question.id }}', '{{ forloop.counter }}')">
+                                            <i class="fas fa-trash"></i> <!-- Font Awesome trash icon -->
+                                        </button>
                                     </div>
                                 {% endfor %}
                             </div>
-                            <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="addOption('{{ question.id }}')">Add Option</button>
+                            
                         </div>
+                        <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="addOption('{{ question.id }}')">Add Option</button>
 
                         <!-- Hidden field for new option count -->
                         <input type="hidden" name="new_option_count_{{ question.id }}" id="new_option_count_{{ question.id }}" value="0">
@@ -61,16 +146,19 @@
 
             <!-- New Question Inputs -->
             <input type="hidden" name="new_question_counter" id="new_question_counter" value="{{ new_question_counter }}">
-            <button type="button" class="btn btn-primary mt-3" onclick="addQuestion()">Add New Question</button>
+            <button type="button" class="btn" style="background-color: #0056b3; color: white; border-color: #0056b3;" onclick="addQuestion()">Add New Question</button>
 
-            <!-- Submit Button -->
-            <div class="mt-4">
+
+            <div class="button-group mt-4">
+                <!-- Submit Button -->
                 <button type="submit" class="btn btn-success">Save Changes</button>
+                <!-- Back to Dashboard Button -->
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
             </div>
+            
         </form>
 
-        <!-- Back to Dashboard Button -->
-        <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-4">Back to Dashboard</a>
+        
     </div>
 
     <script>
@@ -82,7 +170,7 @@
             const questionsDiv = document.getElementById('questions');
 
             const newQuestionHtml = `
-                <div class="question mt-4 border p-3" id="question_${newQuestionCounter}">
+                <div class="form-section mb-4" id="question_${newQuestionCounter}">
                     <label for="new_question_text_${newQuestionCounter}">Question Text:</label>
                     <input type="text" name="new_question_text_${newQuestionCounter}" id="new_question_text_${newQuestionCounter}" class="form-control" required>
 
@@ -96,10 +184,24 @@
                     <div class="options mt-3" id="options_${newQuestionCounter}" style="display:none;">
                         <label>Options:</label>
                         <div class="option-group" id="option-group_${newQuestionCounter}">
+                            <div class="option-item d-flex align-items-center mt-2" id="option_${newQuestionCounter}_1">
+                                <input type="text" name="new_option_text_${newQuestionCounter}_1" class="form-control me-2" required>
+                                <button type="button" class="option-delete-btn" onclick="removeOption(${newQuestionCounter}, 1)">
+                                    <i class="fas fa-trash"></i> <!-- Font Awesome trash icon -->
+                                </button>
+                            </div>
+                            <div class="option-item d-flex align-items-center mt-2" id="option_${newQuestionCounter}_2">
+                                <input type="text" name="new_option_text_${newQuestionCounter}_2" class="form-control me-2" required>
+                                <button type="button" class="option-delete-btn" onclick="removeOption(${newQuestionCounter}, 2)">
+                                    <i class="fas fa-trash"></i> <!-- Font Awesome trash icon -->
+                                </button>
+                            </div>
                         </div>
-                        <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="addOption(${newQuestionCounter})">Add Option</button>
+                        
                     </div>
-                    <input type="hidden" name="new_option_count_${newQuestionCounter}" id="new_option_count_${newQuestionCounter}" value="0">
+                    <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="addOption('{{ question.id }}')">Add Option</button>
+
+                    <input type="hidden" name="new_option_count_${newQuestionCounter}" id="new_option_count_${newQuestionCounter}" value="2">
 
                     <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeQuestion(${newQuestionCounter})">Remove Question</button>
                 </div>
@@ -116,7 +218,9 @@
             const newOptionHtml = `
                 <div class="option-item d-flex align-items-center mt-2" id="option_${questionId}_${optionCount}">
                     <input type="text" name="new_option_text_${questionId}_${optionCount}" class="form-control me-2" required>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="removeOption('${questionId}', ${optionCount})">Remove</button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeOption(${questionId}, ${optionCount})">
+                        <i class="fas fa-trash"></i> <!-- Font Awesome trash icon -->
+                    </button>
                 </div>
             `;
             optionGroup.insertAdjacentHTML('beforeend', newOptionHtml);
