@@ -1,57 +1,105 @@
-<!-- surveys/templates/surveys/home.html -->
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    {% load static %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{% static 'css/home.css' %}" rel="stylesheet">
-</head>
-<body>
-    <div class="container text-center mt-5">
-        <h1>Welcome to the Survey App</h1>
-        <p>Please choose an option to continue:</p>
-        <div class="d-grid gap-2 col-6 mx-auto mt-4">
-            <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
-            <a href="{% url 'register' %}" class="btn btn-secondary">Register</a>
-        </div>
-    </div>
-</body>
-</html> -->
-
-<!-- surveys/templates/surveys/home.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
-    <!-- Linking to Bootstrap CDN -->
+    <title>Survey App - Home</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Linking to Custom CSS -->
-    <link href="{% static 'css/home.css' %}" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #fbeaeb, #2f3c7e); /* Pastel pink to deep blue gradient */
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .main-container {
+            background: #ffffff; /* White background */
+            border-radius: 15px;
+            padding: 50px 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
+            width: 90%;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2f3c7e; /* Deep blue */
+        }
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            color: #666;
+        }
+        .btn {
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 12px 25px;
+            border-radius: 30px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: block;
+            width: 100%;
+            max-width: 250px;
+            margin: 10px auto;
+        }
+        .btn-primary {
+            background: #2f3c7e; /* Deep blue */
+            border: none;
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background: #25306d; /* Slightly darker blue */
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .btn-secondary {
+            background: #fbeaeb; /* Pastel pink */
+            border: none;
+            color: #2f3c7e; /* Deep blue text */
+        }
+        .btn-secondary:hover {
+            background: #e8d9d9; /* Slightly darker pink */
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .logo {
+            max-width: 100px;
+            margin-bottom: 20px;
+            width: 150px; /* Adjust width */
+            height: auto; /* Maintain aspect ratio */
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        .footer-link {
+            color: #2f3c7e; /* Deep blue */
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <!-- Main Container -->
     <div class="main-container">
-        <div class="content">
-            <h1>Welcome to the Survey App</h1>
-            <p class="lead">Choose an option to get started</p>
-            <!-- Buttons for Login and Register -->
-            <div class="btn-group">
-                <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Login</a>
-                <a href="{% url 'register' %}" class="btn btn-secondary btn-lg">Register</a>
-            </div>
-        </div>
+        <!-- Add Logo -->
+        <img src="{% static 'images/logo.png' %}" alt="Survey App Logo" class="logo">
+        <h1>Welcome to the Survey App!</h1>
+        <p>Choose an option to get started</p>
+        <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+        <a href="{% url 'register' %}" class="btn btn-secondary">Register</a>
     </div>
-    <!-- Linking to Bootstrap JS and dependencies -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
