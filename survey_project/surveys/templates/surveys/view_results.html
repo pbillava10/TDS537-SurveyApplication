@@ -5,27 +5,130 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survey Results</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #fbeaeb, #2f3c7e); /* Pastel pink to deep blue gradient */
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 50px;
+            max-width: 900px;
+        }
+
+        h2 {
+            color: #2f3c7e; /* Deep blue */
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .summary {
+            background-color: #f1fcf5; /* Light section background */
+            border-left: 4px solid #2f3c7e; /* Deep blue border */
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-section {
+            background-color: #f9f9f9; /* Light gray for each question section */
+            border-left: 4px solid #2f3c7e; /* Deep blue accent border */
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        ul li {
+            padding: 10px 0;
+            font-size: 16px;
+            color: #495057;
+        }
+
+        ul li span.answer {
+            font-weight: 600;
+            color: #007bff; /* Highlight answers with blue */
+        }
+
+        ul li span.percentage {
+            font-weight: 600;
+            color: #e74c3c; /* Highlight percentages with red */
+        }
+
+        .btn-secondary {
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+            background-color: #2f3c7e;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #25306d;
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2>Results for Survey: {{ survey.name }}</h2>
 
-        <!-- Display total takers and total responses -->
-        <p><strong>Total Takers:</strong> {{ total_takers }}</p>
-        <p><strong>Total Responses (Completed):</strong> {{ total_responses }}</p>
+    <div class="container">
+        <h2>Survey Results</h2>
 
+        <!-- Display survey details and summary -->
+        <div class="summary">
+            <p><strong>Survey Name:</strong> {{ survey.name }}</p>
+            <p><strong>Total Takers:</strong> {{ total_takers }}</p>
+            <p><strong>Total Responses (Completed):</strong> {{ total_responses }}</p>
+        </div>
+
+        <!-- Display questions and responses -->
         <div class="mt-4">
             {% for question, answers in results.items %}
-                <h4>{{ question }}</h4>
-                <ul>
-                    {% for answer, data in answers.items %}
-                        <li>{{ answer }}: {{ data.count }} users ({{ data.percentage|floatformat:2 }}%)</li>
-                    {% endfor %}
-                </ul>
+                <div class="question-section">
+                    <h5>{{ question }}</h5>
+                    <ul>
+                        {% for answer, data in answers.items %}
+                            <li>
+                                <span class="answer">{{ answer }}:</span> {{ data.count }} users 
+                                (<span class="percentage">{{ data.percentage|floatformat:2 }}%</span>)
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             {% endfor %}
         </div>
 
-        <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+        <!-- Back to Dashboard button -->
+        <div class="text-center">
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+        </div>
     </div>
+
 </body>
 </html>
