@@ -8,7 +8,6 @@ urlpatterns = [
     path('logout/', views.custom_login, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('create/', views.create_survey, name='create_survey'),
-    # path('survey/<int:survey_id>/invite_new_takers/', views.invite_new_takers, name='invite_new_takers'),
     path('survey/<int:survey_id>/publish/', views.publish_survey, name='publish_survey'),
     path('survey/<int:survey_id>/close/', views.close_survey, name='close_survey'),
     path('survey/<int:survey_id>/edit/', views.edit_survey, name='edit_survey'),

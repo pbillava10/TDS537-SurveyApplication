@@ -5,6 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Take Survey</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #fbeaeb, #2f3c7e); /* Pastel pink to deep blue gradient */
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 50px;
+            max-width: 900px;
+        }
+
+        h2 {
+            color: #2f3c7e; /* Deep blue */
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .form-section {
+            background-color: #f1fcf5; /* Light section background */
+            border-left: 4px solid #2f3c7e; /* Deep blue border */
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            font-size: 14px;
+            border-radius: 5px;
+            padding: 8px 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control:focus {
+            outline: none;
+            box-shadow: 0 0 5px #2f3c7e;
+            border-color: #2f3c7e;
+        }
+
+        .btn {
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .btn-warning {
+            background-color: #fbeaeb;
+            border-color: #fbeaeb;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background-color: #d1a4a7;
+            border-color: #d1a4a7;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        .btn-secondary {
+            background-color: #2f3c7e;
+            border-color: #2f3c7e;
+            color: #ffffff;
+        }
+
+        .btn-secondary:hover {
+            background-color: #25306d;
+            border-color: #1d2658;
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+    </style>
     <script>
         // Function to toggle the "Others" input field for checkbox questions
         function toggleOtherInput(questionId, checkbox) {
@@ -27,15 +118,15 @@
 
     {% load custom_filters %}
 
-    <div class="container mt-5">
-        <h2 class="text-center">{{ survey.name }}</h2>
+    <div class="container">
+        <h2>{{ survey.name }}</h2>
         <p>{{ survey.description }}</p>
 
         <form method="POST">
             {% csrf_token %}
 
             {% for question in questions %}
-                <div class="mb-4">
+                <div class="form-section">
                     <h5>{{ question.text }}</h5>
 
                     {% if question.question_type == 'radio' %}
