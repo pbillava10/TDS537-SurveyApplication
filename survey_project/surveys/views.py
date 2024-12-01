@@ -20,7 +20,7 @@ def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            # Save user with username, email, and password
+            # Saving user with username, email, and password
             user = form.save(commit=False)
             user.email = form.cleaned_data['email']
             user.save()
@@ -32,7 +32,7 @@ def register(request):
             login(request, user)
 
             # Add the user to the SurveyTakerStatus table for all Published surveys if they are a Taker
-            if profile.role == 'Taker':  # Only add to SurveyTakerStatus for Takers
+            if profile.role == 'Taker':  
                 surveys = Survey.objects.filter(state='Published')  # Only Published surveys
                 for survey in surveys:
                     SurveyTakerStatus.objects.get_or_create(
@@ -47,104 +47,55 @@ def register(request):
 
     return render(request, 'surveys/register.html', {'form': form})
 
-# @login_required
-# def dashboard(request):
-#     profile = Profile.objects.get(user=request.user)
-#
-#     if profile.role == 'Creator':
-#         surveys = Survey.objects.filter(created_by=request.user)
-#         context = {'role': 'Creator', 'surveys': surveys}
-#
-#     elif profile.role == 'Taker':
-#         surveys = Survey.objects.filter(state__in=["Published", "Republished"])
-#
-#         for survey in surveys:
-#             taker_status = SurveyTakerStatus.objects.filter(survey=survey, user=request.user).first()
-#             if taker_status:
-#                 survey.user_status = 'Results Available' if taker_status.results_available else taker_status.survey_status
-#                 survey.can_view_results = taker_status.results_available
-#                 survey.can_retake = survey.state == 'Republished' and taker_status.results_available
-#             else:
-#                 survey.user_status = 'Pending'
-#                 survey.can_view_results = False
-#                 survey.can_retake = False
-#
-#         context = {'role': 'Taker', 'surveys': surveys}
-#
-#
-#     else:
-#         return HttpResponseForbidden("Unauthorized access.")
-#
-#     return render(request, 'surveys/dashboard.html', context)
-
-# @login_required
-# def dashboard(request):
-#     profile = Profile.objects.get(user=request.user)
-#
-#     if profile.role == 'Creator':
-#         surveys = Survey.objects.filter(created_by=request.user)
-#         context = {'role': 'Creator', 'surveys': surveys}
-#
-#     elif profile.role == 'Taker':
-#         surveys = Survey.objects.filter(state__in=["Published", "Republished"])
-#
-#         for survey in surveys:
-#             taker_status = SurveyTakerStatus.objects.filter(survey=survey, user=request.user).first()
-#             if taker_status:
-#                 survey.user_status = 'Results Available' if taker_status.results_available else taker_status.survey_status
-#                 survey.can_view_results = taker_status.results_available
-#                 survey.can_retake = survey.state == 'Republished' and taker_status.results_available
-#             else:
-#                 survey.user_status = 'Pending'
-#                 survey.can_view_results = False
-#                 survey.can_retake = False
-#
-#         context = {'role': 'Taker', 'surveys': surveys}
-#     else:
-#         return HttpResponseForbidden("Unauthorized access.")
-#
-#     return render(request, 'surveys/dashboard.html', context)
-
 def create_survey(request):
+    """
+    Allows survey creators to create a new survey with questions and options.
+    """
     SurveyForm = modelform_factory(Survey, fields=('name', 'description'))
 
     if request.method == 'POST':
         form = SurveyForm(request.POST)
         if form.is_valid():
             try:
-                # Save the survey object first
+                # Create the survey
                 survey = form.save(commit=False)
                 survey.created_by = request.user
                 survey.save()
 
-                # Get all the question texts and question types from the POST request
-                question_texts = request.POST.getlist('question_text')
-                question_types = request.POST.getlist('question_type')
+                # Extract questions from POST data
+                questions_data = {}
+                for key, value in request.POST.items():
+                    if key.startswith('questions['):
+                        question_index = key.split('[')[1].split(']')[0]
+                        if question_index not in questions_data:
+                            questions_data[question_index] = {}
+                        field_name = key.split('][')[-1].replace(']', '')
+                        questions_data[question_index][field_name] = value
 
-                # Validate that at least 5 questions are added
-                if len(question_texts) < 5:
-                    messages.error(request, "You must add at least 5 questions to the survey.")
-                    return render(request, 'surveys/create_survey.html', {'form': form})
+                # Loop through each question and create it in the database
+                for question_index, question_fields in questions_data.items():
+                    question_text = question_fields.get('text', '').strip()
+                    question_type = question_fields.get('type', '').strip()
 
-                # Loop through each question text and create corresponding questions in the DB
-                for i, question_text in enumerate(question_texts):
-                    question_type = question_types[i]
+                    # Skip invalid questions
+                    if not question_text or not question_type:
+                        continue
+
+                    # Create the question
                     question = Question.objects.create(
                         survey=survey,
                         text=question_text,
                         question_type=question_type
                     )
 
-                    # If the question type is radio or checkbox, save options for it
+                    # Process options if applicable
                     if question_type in ['radio', 'checkbox']:
-                        options_key = f'options_{i}[]'
-                        option_texts = request.POST.getlist(options_key)
-                        # Loop through and create options for this question
-                        for option_text in option_texts:
-                            if option_text.strip():  # Ensure non-empty options
-                                Option.objects.create(question=question, text=option_text)
+                        options = request.POST.getlist(f"questions[{question_index}][options][]")
+                        for option_text in options:
+                            if option_text.strip():
+                                Option.objects.create(question=question, text=option_text.strip())
 
-                # Redirect to dashboard after successful survey creation
+                messages.success(request, "Survey created successfully!")
                 return redirect('dashboard')
 
             except Exception as e:
@@ -154,7 +105,7 @@ def create_survey(request):
     else:
         form = SurveyForm()
 
-    return render(request, 'surveys/create_survey.html', {'form': form})\
+    return render(request, 'surveys/create_survey.html', {'form': form})                
 
 def custom_login(request):
     if request.method == 'POST':
@@ -181,42 +132,6 @@ def delete_question(request, survey_id, question_id):
 
     messages.success(request, "Question deleted successfully.")
     return redirect('edit_survey', survey_id=survey.id)
-
-# @login_required
-# def publish_survey(request, survey_id):
-#     survey = get_object_or_404(Survey, id=survey_id, created_by=request.user)
-#     if survey.state == 'Draft':
-#         survey.state = 'Published'
-#         survey.save()
-#         return redirect('dashboard')
-#     else:
-#         return HttpResponseForbidden("Survey cannot be published.")
-
-# @login_required
-# def publish_survey(request, survey_id):
-#     survey = get_object_or_404(Survey, id=survey_id)
-#
-#     if survey.created_by != request.user:
-#         return HttpResponseForbidden("You are not authorized to publish this survey.")
-#
-#     if request.method == 'POST':
-#         selected_users = request.POST.getlist('selected_users')
-#
-#         if not selected_users:
-#             messages.error(request, "Please select at least one user to publish.")
-#             return redirect('dashboard')
-#
-#         # Handle bulk publishing logic
-#         for user_id in selected_users:
-#             user = Profile.objects.get(id=user_id)
-#             SurveyTakerStatus.objects.get_or_create(survey=survey, user=user, survey_status='Pending')
-#
-#         survey.state = 'Published'
-#         survey.save()
-#         messages.success(request, "Survey published successfully.")
-#         return redirect('dashboard')
-#
-#     return HttpResponseForbidden("Invalid request.")
 
 @login_required
 def close_survey(request, survey_id):
@@ -496,71 +411,7 @@ def update_survey_status(request, survey_id):
             )
 
     return redirect("dashboard")
-# @login_required
-# def invite_new_takers(request, survey_id):
-#     # Fetch the survey object
-#     survey = get_object_or_404(Survey, id=survey_id)
-#
-#     if survey.created_by != request.user:
-#         return HttpResponseForbidden("You are not the creator of this survey.")
-#
-#     # Fetch all takers
-#     takers = Profile.objects.filter(role='Taker')
-#
-#     # Get already invited takers (those with status 'Pending')
-#     already_invited_takers = SurveyTakerStatus.objects.filter(survey=survey, status='Pending').values_list('user', flat=True)
-#
-#     # Handle form submission (AJAX)
-#     if request.method == 'POST':
-#         selected_users = request.POST.getlist('selected_users')
-#
-#         # Logic to invite new users
-#         for user_id in selected_users:
-#             user = Profile.objects.get(id=user_id)
-#             SurveyTakerStatus.objects.create(survey=survey, user=user, status='Pending')
-#
-#         return messages.success({'message': 'Invites sent successfully'})
-#
-#     return render(request, 'surveys/dashboard.html', {
-#         'survey': survey,
-#         'takers': takers,
-#         'already_invited_takers': already_invited_takers,  # To disable users already invited
-#     })
-#
-# @login_required
-# def send_invites(request, survey_id):
-#     # Fetch the survey object
-#     survey = get_object_or_404(Survey, id=survey_id)
-#
-#     # Check if the user is the survey creator
-#     if request.user != survey.creator:
-#         messages.error(request, "You are not authorized to send invites for this survey.")
-#         return redirect('dashboard')  # Redirect to the dashboard or an appropriate page
-#
-#     if request.method == 'POST':
-#         # Get selected users from the form
-#         selected_users = request.POST.getlist('selected_users')
-#         select_all = request.POST.get('select_all')
-#
-#         if select_all:  # If "Select All" is checked, invite all users
-#             selected_users = Profile.objects.exclude(id=request.user.id)  # Exclude the creator from being invited
-#
-#         # Process each selected user and send the invite
-#         for user_id in selected_users:
-#             user = Profile.objects.get(id=user_id)
-#             if not survey.invited_users.filter(id=user.id).exists():
-#                 # Add the user to the invited users list of the survey
-#                 survey.invited_users.add(user)
-#                 # Optionally, send an email or other notification
-#                 # send_invite_email(user, survey)
-#
-#         # Provide feedback to the creator
-#         messages.success(request, "Invites have been sent successfully.")
-#         return redirect('dashboard', survey_id=survey.id)  # Redirect to the survey detail page
-#
-#     else:
-#         # If the request method is not POST, show the invite modal (optional for AJAX handling)
-#         return redirect('dashboard')
+
 
 @login_required
 def dashboard(request):
@@ -585,7 +436,7 @@ def dashboard(request):
         # Get surveys where the user is invited or the survey is in published or republished state
         surveys = Survey.objects.filter(
             Q(state__in=["Published", "Republished"]) &
-            Q(invited_users=request.user)  # Only show surveys the taker is invited to
+            Q(invited_users=request.user)  
         ).distinct()
 
         taker_surveys = []
