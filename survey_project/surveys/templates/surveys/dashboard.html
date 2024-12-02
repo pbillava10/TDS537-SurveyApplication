@@ -132,6 +132,7 @@
         {% if role == 'Creator' %}
         <div class="text-center mb-4">
             <h2>Welcome, {{ user.username }}!</h2>
+            <br>
             <a href="{% url 'create_survey' %}" class="btn btn-primary">Create New Survey</a>
         </div>
 

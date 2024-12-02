@@ -72,6 +72,11 @@ def create_survey(request):
                         field_name = key.split('][')[-1].replace(']', '')
                         questions_data[question_index][field_name] = value
 
+                # Check if there are at least 5 questions
+                if len(questions_data) < 5:
+                    messages.error(request, "Please add at least 5 questions to your survey.")
+                    return render(request, 'surveys/create_survey.html', {'form': form})
+
                 # Loop through each question and create it in the database
                 for question_index, question_fields in questions_data.items():
                     question_text = question_fields.get('text', '').strip()
@@ -105,7 +110,7 @@ def create_survey(request):
     else:
         form = SurveyForm()
 
-    return render(request, 'surveys/create_survey.html', {'form': form})                
+    return render(request, 'surveys/create_survey.html', {'form': form})
 
 def custom_login(request):
     if request.method == 'POST':
@@ -170,52 +175,19 @@ def edit_survey(request, survey_id):
             for question in survey.questions.prefetch_related('options'):
                 question_text = request.POST.get(f'question_text_{question.id}')
                 question_type = request.POST.get(f'question_type_{question.id}')
-
                 if question_text and question_type:
-                    # Update question details
                     question.text = question_text
                     question.question_type = question_type
                     question.save()
 
-                    # Process options for radio/checkbox questions
                     if question_type in ['radio', 'checkbox']:
-                        submitted_option_ids = request.POST.getlist(f'option_id_{question.id}')
-                        print(f'submitted_option_ids: {submitted_option_ids}')
                         submitted_option_texts = request.POST.getlist(f'option_text_{question.id}')
-                        print(f'submitted_option_texts: {submitted_option_texts}')
+                        question.options.all().delete()
+                        for option_text in submitted_option_texts:
+                            if option_text.strip():
+                                Option.objects.create(question=question, text=option_text)
 
-                        existing_options = {
-                            str(option.id): option for option in question.options.all()
-                        }
-
-                        # Update or delete existing options
-                        for option_id, option_text in zip(submitted_option_ids, submitted_option_texts):
-                            if option_id in existing_options:
-                                option = existing_options[option_id]
-                                if option.text != option_text:
-                                    OptionEdit.objects.create(
-                                        option=option,
-                                        old_text=option.text,
-                                        edited_by=request.user
-                                    )
-                                    option.text = option_text
-                                    option.save()
-                                existing_options.pop(option_id)
-
-                        # Delete options not submitted
-                        for option in existing_options.values():
-                            option.delete()
-
-                        # Add new options
-                        new_option_count = int(request.POST.get(f'new_option_count_{question.id}', 0))
-                        print(f'new_option_count for question {question.id}: {new_option_count}')
-                        for i in range(1, new_option_count + 1):
-                            new_option_text = request.POST.get(f'new_option_text_{question.id}_{i}')
-                            print(f'Adding new option: {new_option_text} for question {question.id}')
-                            if new_option_text:
-                                Option.objects.create(question=question, text=new_option_text)
-
-            # Handle newly added questions
+            # Handle new questions
             new_question_counter = int(request.POST.get('new_question_counter', 0))
             for i in range(1, new_question_counter + 1):
                 new_question_text = request.POST.get(f'new_question_text_{i}')
@@ -227,7 +199,6 @@ def edit_survey(request, survey_id):
                         text=new_question_text,
                         question_type=new_question_type
                     )
-
                     if new_question_type in ['radio', 'checkbox']:
                         new_option_count = int(request.POST.get(f'new_option_count_{i}', 0))
                         for j in range(1, new_option_count + 1):
@@ -241,7 +212,6 @@ def edit_survey(request, survey_id):
 
         return redirect('survey_detail', survey_id=survey.id)
 
-    # Prepare data for rendering
     questions = survey.questions.prefetch_related('options')
     return render(request, 'surveys/edit_survey.html', {
         'survey': survey,
@@ -412,7 +382,6 @@ def update_survey_status(request, survey_id):
 
     return redirect("dashboard")
 
-
 @login_required
 def dashboard(request):
     profile = Profile.objects.get(user=request.user)
@@ -422,7 +391,8 @@ def dashboard(request):
         taker_status = SurveyTakerStatus.objects.filter(survey__in=surveys).select_related('taker__user')
 
         # Fetch all users who can be invited except the current user (creator)
-        available_takers = Profile.objects.exclude(user=request.user)
+        # available_takers = Profile.objects.exclude(user=request.user)
+        available_takers = Profile.objects.filter(role="Taker")
 
         context = {
             'role': 'Creator',
